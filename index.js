@@ -318,14 +318,18 @@ Promise.prototype.done = function (fulfilled, rejected, progress) {
         // forward to a future turn so that ``when``
         // does not catch it and turn it into a rejection.
         var onerror = Q.onerror;
-        scheduler(function () {
+        var errorHandler = function () {
             promise._attachExtraTrace(error);
             if (onerror) {
                 onerror(error);
             } else {
                 throw error;
             }
-        });
+        };
+        var sheduled = scheduler(errorHandler);
+        if (scheduler.isStatic === true && typeof sheduled === "function") {
+        	sheduled();
+    	}
     };
 
     // Avoid unnecessary `nextTick`ing via an unnecessary `when`.
